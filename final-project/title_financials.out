@@ -1,0 +1,6 @@
+select count(*) from title_financials;
+
+ count
+-------
+ 14141
+(1 row)

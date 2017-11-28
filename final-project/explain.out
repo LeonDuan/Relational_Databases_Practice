@@ -1,0 +1,42 @@
+# First SELECT  query
+imdb=> explain select title_id from title_basics where upper(primary_title) = 'INCEPTION' and start_year = 2005;
+                                            QUERY PLAN                                           
+--------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on title_basics  (cost=22.86..2286.16 rows=615 width=10)
+   Recheck Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005))
+   ->  Bitmap Index Scan on ptc_sy_idx  (cost=0.00..22.71 rows=615 width=0)
+         Index Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005))(4 rows)
+
+
+
+
+
+
+
+# Second SELECT query
+imdb=> explain select title_id from title_basics where upper(primary_title) = 'INCEPTION' and start_year = 2005 and title_type <> 'tvEpisode';
+                                                                 QUERY PLAN                      
+--------------------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on title_basics  (cost=10.59..819.24 rows=211 width=10)
+   Recheck Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005) AND ((title_type)::text <> 'tvEpisode'::text))
+   ->  Bitmap Index Scan on ptc_sy_tt_idx  (cost=0.00..10.54 rows=211 width=0)
+         Index Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005))(4 rows)
+
+
+
+
+
+
+
+
+# Third SELECT query
+imdb=> explain select title_id from title_basics join title_genres using(title_id) where upper(primary_title) = 'INCEPTION' and start_year = 2005 and genre = 'Comedy';
+                                               QUERY PLAN                                        
+--------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=23.29..7454.59 rows=130 width=10)
+   ->  Bitmap Heap Scan on title_basics  (cost=22.86..2286.16 rows=615 width=10)
+         Recheck Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005))
+         ->  Bitmap Index Scan on ptc_sy_idx  (cost=0.00..22.71 rows=615 width=0)
+               Index Cond: ((upper((primary_title)::text) = 'INCEPTION'::text) AND (start_year = 2005))
+   ->  Index Only Scan using title_genres_pkey on title_genres  (cost=0.43..8.39 rows=1 width=10)         Index Cond: ((title_id = (title_basics.title_id)::text) AND (genre = 'Comedy'::text))
+(7 rows)

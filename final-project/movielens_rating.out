@@ -1,0 +1,4 @@
+select count(*) from title_ratings where movielens_rating is not NULL;
+ count
+-------
+ 26687
